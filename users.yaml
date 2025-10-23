@@ -1,0 +1,11 @@
+
+users:
+  admin:
+    password: admin123
+    role: admin
+  editor1:
+    password: editor123
+    role: editor
+  viewer1:
+    password: viewer123
+    role: viewer
