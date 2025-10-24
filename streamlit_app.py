@@ -46,14 +46,14 @@ def login_flow():
         st.sidebar.success(f"Signed in as {st.session_state.auth['user']} ({st.session_state.auth['role']})")
         if st.sidebar.button("Sign out"):
             st.session_state.auth = {"user": None, "role": "viewer"}
-            st.experimental_rerun()
+            st.rerun()
         return st.session_state.auth
     u = st.sidebar.text_input("Username")
     p = st.sidebar.text_input("Password", type="password")
     if st.sidebar.button("Sign in"):
         if u in users and p == str(users[u].get("password")):
             st.session_state.auth = {"user": u, "role": users[u].get("role", "viewer")}
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.sidebar.error("Invalid credentials")
     return st.session_state.auth
