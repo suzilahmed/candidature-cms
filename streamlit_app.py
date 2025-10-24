@@ -152,6 +152,19 @@ def insert_record(conn, record: dict):
 
 def export_report_workbook(conn, include_all_template_sheets: bool = True) -> bytes:
     df = read_records(conn)
+    # NEW: quick actions
+col_top_a, col_top_b = st.columns(2)
+with col_top_a:
+    if st.button("🔄 Reset filters"):
+        st.session_state.pop("ed_records", None)  # clear editor state
+        st.session_state.pop("filter_cat", None)
+        st.session_state.pop("filter_country", None)
+        st.session_state.pop("filter_body", None)
+        st.session_state.pop("filter_attach", None)
+        st.rerun()
+with col_top_b:
+    if not df.empty and st.button("👀 Show latest 10"):
+        st.dataframe(df.tail(10), use_container_width=True)
     template_sheets = get_template_categories() if include_all_template_sheets else []
     output = BytesIO()
     with pd.ExcelWriter(output, engine="openpyxl") as writer:
@@ -180,6 +193,15 @@ perms = ROLE_PERMS.get(auth["role"], ROLE_PERMS["viewer"])
 with st.sidebar:
     st.header("Setup & Import")
     st.write(f"DB: `{DB_PATH}`")
+
+    # NEW: live row count to confirm data is saved
+    try:
+        with connect() as _c:
+            _c.execute('CREATE TABLE IF NOT EXISTS records (id INTEGER)')
+            _count = _c.execute('SELECT COUNT(*) FROM records').fetchone()[0]
+        st.info(f"Records in DB: **{_count}**")
+    except Exception as e:
+        st.warning(f"Could not read records count: {e}")
     st.write(f"Template: `{DEFAULT_XLSX.name}` {'✅' if DEFAULT_XLSX.exists() else '⚠️ not found'}")
     if st.button("Initialize DB"):
         with connect() as conn:
